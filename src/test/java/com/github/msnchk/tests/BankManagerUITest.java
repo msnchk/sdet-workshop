@@ -3,7 +3,6 @@ package com.github.msnchk.tests;
 import com.github.msnchk.helpers.CustomerDataProvider;
 import com.github.msnchk.models.Customer;
 import com.github.msnchk.helpers.Endpoint;
-import com.github.msnchk.pages.AddCustomerPage;
 import com.github.msnchk.pages.ManagerPage;
 import io.qameta.allure.*;
 import org.openqa.selenium.WebDriver;

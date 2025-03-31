@@ -35,7 +35,7 @@ jobs:
           cache: maven
 
       - name: Run tests with Maven
-        run: mvn clean test -Dsurefire.suiteXmlFiles=src/test/resources/suites/ui_tests_parallel.xml -Dheadless=true
+        run: mvn test -Dsurefire.suiteXmlFiles=src/test/resources/suites/ui_tests_sequential.xml
 
       - name: Generate Allure Report
         uses: simple-elf/allure-report-action@v1.7

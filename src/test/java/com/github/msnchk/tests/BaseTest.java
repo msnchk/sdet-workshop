@@ -23,8 +23,12 @@ public class BaseTest {
                 "--remote-allow-origins=*",
                 "--disable-gpu",
                 "--no-sandbox",
-                "--headless"
+                "--headless=new",
+                "--disable-dev-shm-usage",
+                "--window-size=1920,1080",
+                "--disable-blink-features=AutomationControlled"
         );
+
         final WebDriver driver = new ChromeDriver(options);
         tlDriver.set(driver);
         driver.manage().deleteAllCookies();

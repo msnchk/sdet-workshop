@@ -14,7 +14,7 @@ public class CustomerDataProvider {
      *
      * @return двумерный массив с объектами {@code Customer}
      */
-    @DataProvider(name = "invalidCustomerData", parallel = true)
+    @DataProvider(name = "invalidCustomerData")
     public Object[][] invalidCustomerData() {
         return new Object[][]{
                 {new Customer("", "LastName", "1234567890")},

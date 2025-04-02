@@ -27,7 +27,7 @@ jobs:
 
       - name: Start Selenium Grid with Docker Compose
         run: |
-          docker-compose up -d
+          docker compose up -d
           sleep 15 
 
       - name: Check Selenium status

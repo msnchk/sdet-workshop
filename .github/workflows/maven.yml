@@ -36,7 +36,7 @@ jobs:
       - name: Run tests with Maven
         run: mvn clean test
         env:
-          SELENIUM_URL: "http://selenium-hub:4444/wd/hub"
+          SELENIUM_URL: "http://localhost:4444/wd/hub"
           ALLURE_RESULTS_DIRECTORY: "target/allure-results"
 
       - name: Install Allure CLI

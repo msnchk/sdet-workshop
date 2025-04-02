@@ -35,7 +35,7 @@ public class BaseTest {
                     "--window-size=1920,1080",
                     "--disable-blink-features=AutomationControlled"
             );
-            WebDriver driver = new RemoteWebDriver(new URL("http://selenium-hub:4444/wd/hub"), options);
+            WebDriver driver = new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), options);
             tlDriver.set(driver);
             driver.manage().deleteAllCookies();
             driver.get(urlManagerPage);

@@ -39,18 +39,10 @@ jobs:
           SELENIUM_URL: "http://localhost:4444/wd/hub"
           ALLURE_RESULTS_DIRECTORY: "target/allure-results"
 
-      - name: Install Allure CLI
-        run: sudo apt-get update && sudo apt-get install -y allure
-
-      - name: Generate Allure Report
-        run: |
-          allure generate target/allure-results -o target/allure-report --single-file --clean
-
-      - name: Upload Allure HTML Report
-        uses: actions/upload-artifact@v4
+      - name: Build test results
+        uses: simple-elf/allure-report-action@v1.7
         with:
-          name: allure-html-report
-          path: target/allure-report
+          allure_results: target/allure-results
 
       - name: Upload Raw Results
         uses: actions/upload-artifact@v4
@@ -60,4 +52,4 @@ jobs:
 
       - name: Stop Selenium Grid
         if: always()
-        run: docker-compose down
+        run: docker compose down

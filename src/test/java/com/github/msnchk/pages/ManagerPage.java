@@ -15,7 +15,6 @@ public class ManagerPage extends BasePage {
     @FindBy(xpath = "//button[contains(text(), 'Customers')]")
     private WebElement customersButton;
 
-
     /**
      * Конструктор страницы менеджера.
      *
@@ -31,7 +30,7 @@ public class ManagerPage extends BasePage {
      * @return объект {@code AddCustomerPage}
      */
     public AddCustomerPage goToAddCustomer() {
-        performClick(addCustomerButton);
+        addCustomerButton.click();
         return new AddCustomerPage(driver);
     }
 
@@ -41,7 +40,7 @@ public class ManagerPage extends BasePage {
      * @return объект {@code CustomersPage}
      */
     public CustomersPage goToCustomersList() {
-        performClick(customersButton);
+        customersButton.click();
         return new CustomersPage(driver);
     }
 }

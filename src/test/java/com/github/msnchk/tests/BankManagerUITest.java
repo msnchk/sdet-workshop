@@ -1,13 +1,11 @@
 package com.github.msnchk.tests;
 
 import com.github.msnchk.helpers.CustomerDataProvider;
+import com.github.msnchk.helpers.PropertyProvider;
 import com.github.msnchk.models.Customer;
-import com.github.msnchk.helpers.Endpoint;
 import com.github.msnchk.pages.ManagerPage;
 import io.qameta.allure.*;
-import org.openqa.selenium.WebDriver;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
@@ -18,27 +16,9 @@ import org.testng.asserts.SoftAssert;
 @Epic("Bank Customer Management")
 @Feature("UI Testing of Bank Manager Functionalities")
 public class BankManagerUITest extends BaseTest {
-    private static final Object lock = new Object();
-    private ManagerPage managerPage;
-
-    /**
-     * Подготовка перед тестами.
-     * Открывает страницу менеджера банка и ожидает её загрузки.
-     *
-     * @throws IllegalStateException если {@code WebDriver} не был инициализирован для текущего потока
-     */
-    @BeforeMethod()
-    public void setUpTest() {
-        WebDriver driver = getDriver();
-        if (driver == null) {
-            throw new IllegalStateException("WebDriver не был инициализирован для потока " + Thread.currentThread().getId());
-        }
-        synchronized (lock) {
-            driver.get(Endpoint.BANK_MANAGER.getUrl());
-        }
-        managerPage = new ManagerPage(driver);
-        managerPage.waitForPageLoaded(Endpoint.BANK_MANAGER.getUrl());
-    }
+    private final String urlManagerPage = PropertyProvider.getInstance().getProperty("web.manager.url");
+    private final String urlAddCustomer = PropertyProvider.getInstance().getProperty("web.addcust.url");
+    private final String urlCustomersList = PropertyProvider.getInstance().getProperty("web.customers.url");
 
     /**
      * Проверяет добавление клиента с корректными данными.
@@ -50,25 +30,24 @@ public class BankManagerUITest extends BaseTest {
     @Severity(SeverityLevel.CRITICAL)
     public void shouldAddCustomerWithValidData() {
         SoftAssert softAssert = new SoftAssert();
-
+        ManagerPage managerPage = new ManagerPage(getDriver());
+        managerPage.waitForPageLoaded(urlManagerPage);
         var addCustomerPage = managerPage.goToAddCustomer();
-        addCustomerPage.waitForPageLoaded(Endpoint.ADD_CUSTOMER.getUrl());
-
+        addCustomerPage.waitForPageLoaded(urlAddCustomer);
         Customer customer = addCustomerPage.createCustomerWithGeneratedData();
         addCustomerPage
-                .fillCustomerDataFields(customer.getFirstName(), customer.getLastName(), customer.getPostCode())
+                .fillCustomerDataFields(customer.firstName(), customer.lastName(), customer.postCode())
                 .submitCustomerData();
 
         softAssert.assertTrue(addCustomerPage.isAlertWithTextPresent("Customer added successfully"),
                 "Не получен ожидаемый алерт о создании пользователя");
 
         var customersPage = managerPage.goToCustomersList();
-        customersPage.waitForPageLoaded(Endpoint.CUSTOMERS_LIST.getUrl());
+        customersPage.waitForPageLoaded(urlCustomersList);
 
         softAssert.assertTrue(customersPage.isCustomerPresent(
-                        customer.getFirstName(), customer.getLastName(), customer.getPostCode()),
+                        customer.firstName(), customer.lastName(), customer.postCode()),
                 "Клиент не найден в списке");
-
         softAssert.assertAll();
     }
 
@@ -82,24 +61,23 @@ public class BankManagerUITest extends BaseTest {
     @Severity(SeverityLevel.CRITICAL)
     public void shouldNotAddCustomerWithEmptyFields(Customer customer) {
         SoftAssert softAssert = new SoftAssert();
-
+        ManagerPage managerPage = new ManagerPage(getDriver());
+        managerPage.waitForPageLoaded(urlManagerPage);
         var addCustomerPage = managerPage.goToAddCustomer();
-        addCustomerPage.waitForPageLoaded(Endpoint.ADD_CUSTOMER.getUrl());
-
+        addCustomerPage.waitForPageLoaded(urlAddCustomer);
         addCustomerPage
-                .fillCustomerDataFields(customer.getFirstName(), customer.getLastName(), customer.getPostCode())
+                .fillCustomerDataFields(customer.firstName(), customer.lastName(), customer.postCode())
                 .submitCustomerData();
 
         softAssert.assertFalse(addCustomerPage.isAlertWithTextPresent("Customer added successfully"),
                "Получен алерт, появление которого не ожидалось");
 
         var customersPage = managerPage.goToCustomersList();
-        customersPage.waitForPageLoaded(Endpoint.CUSTOMERS_LIST.getUrl());
+        customersPage.waitForPageLoaded(urlCustomersList);
 
         softAssert.assertFalse(customersPage.isCustomerPresent(
-                        customer.getFirstName(), customer.getLastName(), customer.getPostCode()),
+                        customer.firstName(), customer.lastName(), customer.postCode()),
                 "Клиент c некорректными данными найден в списке");
-
         softAssert.assertAll();
     }
 
@@ -113,16 +91,17 @@ public class BankManagerUITest extends BaseTest {
     @Severity(SeverityLevel.MINOR)
     public void shouldSortCustomersByName() {
         SoftAssert softAssert = new SoftAssert();
-
+        ManagerPage managerPage = new ManagerPage(getDriver());
+        managerPage.waitForPageLoaded(urlManagerPage);
         var customersPage = managerPage.goToCustomersList();
-        customersPage.waitForPageLoaded(Endpoint.CUSTOMERS_LIST.getUrl());
-
+        customersPage.waitForPageLoaded(urlCustomersList);
         customersPage.sortFirstNames();
+
         softAssert.assertTrue(customersPage.checkFirstNamesOrder(true));
 
         customersPage.sortFirstNames();
-        softAssert.assertTrue(customersPage.checkFirstNamesOrder(false));
 
+        softAssert.assertTrue(customersPage.checkFirstNamesOrder(false));
         softAssert.assertAll();
     }
 
@@ -131,26 +110,25 @@ public class BankManagerUITest extends BaseTest {
      * Берется клиент с именем, наиболее близким по длине к средней длине имён в списке.
      * Ожидается, что клиент будет успешно удалён.
      */
-
     @Test(description = "Deleting a customer by name")
     @Story("Delete Customer")
     @Severity(SeverityLevel.CRITICAL)
     public void shouldDeleteCustomerByName() {
+        ManagerPage managerPage = new ManagerPage(getDriver());
+        managerPage.waitForPageLoaded(urlManagerPage);
         var customersPage = managerPage.goToCustomersList();
-        customersPage.waitForPageLoaded(Endpoint.CUSTOMERS_LIST.getUrl());
-
+        customersPage.waitForPageLoaded(urlCustomersList);
         String nameToDelete = customersPage.getMiddleLengthName();
-        Assert.assertFalse(nameToDelete.isEmpty(), "Не удалось определить имя для удаления");
 
+        Assert.assertFalse(nameToDelete.isEmpty(), "Не удалось определить имя для удаления");
         System.out.println("Удаляем клиента с именем: " + nameToDelete);
         Assert.assertTrue(customersPage.deleteName(nameToDelete),
                 "Не удалось кликнуть по кнопке удаления клиента с именем " + nameToDelete);
 
         getDriver().navigate().refresh();
-        customersPage.waitForPageLoaded(Endpoint.CUSTOMERS_LIST.getUrl());
+        customersPage.waitForPageLoaded(urlCustomersList);
 
         Assert.assertFalse(customersPage.getAllFirstNames().contains(nameToDelete),
                 "Клиент с именем " + nameToDelete + " все еще присутствует в списке после удаления");
     }
-
 }

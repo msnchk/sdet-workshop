@@ -82,16 +82,6 @@ public class Wait {
     }
 
     /**
-     * Ожидает, пока элемент станет кликабельным.
-     *
-     * @param element веб-элемент
-     * @return кликабельный элемент
-     */
-    public WebElement waitForElementToBeClickable(WebElement element) {
-        return driverWait.until(ExpectedConditions.elementToBeClickable(element));
-    }
-
-    /**
      * Ожидает появления всплывающего окна (Alert).
      *
      * @return объект {@code Optional}, содержащий Alert, если он появился, или пустое значение, если истек таймаут

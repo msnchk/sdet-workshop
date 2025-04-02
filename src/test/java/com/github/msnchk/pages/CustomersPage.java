@@ -64,7 +64,7 @@ public class CustomersPage extends BasePage {
 
         try {
             WebElement deleteButton = driver.findElement(By.xpath(xpath));
-            performClick(deleteButton);
+            deleteButton.click();
             return true;
         } catch (NoSuchElementException e) {
             System.out.println("Кнопка удаления не найдена для имени: " + name);
@@ -134,6 +134,6 @@ public class CustomersPage extends BasePage {
      */
     @Step("Press button to sort customer names by first name")
     public void sortFirstNames() {
-        performClick(firstNameSort);
+        firstNameSort.click();
     }
 }

@@ -44,9 +44,9 @@ public class AddCustomerPage extends BasePage {
 
     @Step("Filling in customer details: First Name = {firstName}, Last Name = {lastName}, Post Code = {postCode}")
     public AddCustomerPage fillCustomerDataFields(String firstName, String lastName, String postCode) {
-        enterText(postCodeInput, postCode);
-        enterText(firstNameInput, firstName);
-        enterText(lastNameInput, lastName);
+        postCodeInput.sendKeys(postCode);
+        firstNameInput.sendKeys(firstName);
+        lastNameInput.sendKeys(lastName);
         return this;
     }
 
@@ -69,7 +69,7 @@ public class AddCustomerPage extends BasePage {
      */
     @Step("Submitting the customer data")
     public void submitCustomerData() {
-        performClick(addButton);
+        addButton.click();
     }
 
     /**

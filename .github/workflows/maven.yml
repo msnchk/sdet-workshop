@@ -1,11 +1,3 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 name: Java CI with Maven
 
 on:
@@ -20,7 +12,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -34,17 +25,39 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Start Selenium Grid with Docker Compose
+        run: |
+          docker-compose up -d
+          sleep 15 
+
+      - name: Check Selenium status
+        run: curl -sSf http://selenium-hub:4444/wd/hub/status | jq .value.ready
+
       - name: Run tests with Maven
-        run: mvn test -Dsurefire.suiteXmlFiles=src/test/resources/suites/ui_tests_parallel.xml
+        run: mvn clean test
+        env:
+          SELENIUM_URL: "http://selenium-hub:4444/wd/hub"
+          ALLURE_RESULTS_DIRECTORY: "target/allure-results"
+
+      - name: Install Allure CLI
+        run: sudo apt-get update && sudo apt-get install -y allure
 
       - name: Generate Allure Report
-        uses: simple-elf/allure-report-action@v1.7
-        if: always()
-        with:
-          allure_results: target/allure-results
+        run: |
+          allure generate target/allure-results -o target/allure-report --single-file --clean
 
-      - name: Upload Allure Report as artifact
+      - name: Upload Allure HTML Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-html-report
+          path: target/allure-report
+
+      - name: Upload Raw Results
         uses: actions/upload-artifact@v4
         with:
           name: allure-results
           path: target/allure-results
+
+      - name: Stop Selenium Grid
+        if: always()
+        run: docker-compose down

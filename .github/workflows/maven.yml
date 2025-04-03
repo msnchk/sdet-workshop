@@ -30,9 +30,6 @@ jobs:
           docker compose up -d
           sleep 15 
 
-      - name: Check Selenium status
-        run: curl -sSf http://localhost:4444/wd/hub | jq .value.ready
-
       - name: Run tests with Maven
         run: mvn clean test
         env:

@@ -31,7 +31,7 @@ jobs:
           sleep 15 
 
       - name: Check Selenium status
-        run: curl -sSf http://selenium-hub:4444/wd/hub/status | jq .value.ready
+        run: curl -sSf http://localhost:4444/wd/hub | jq .value.ready
 
       - name: Run tests with Maven
         run: mvn clean test

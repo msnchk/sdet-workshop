@@ -10,7 +10,7 @@ import org.openqa.selenium.support.FindBy;
 /**
  * Класс {@code AddCustomerPage} представляет страницу добавления нового клиента.
  */
-public class AddCustomerPage extends BasePage {
+public class AddCustomerPage extends BasePage<AddCustomerPage> {
 
     @FindBy(xpath = "//input[@ng-model='fName']")
     private WebElement firstNameInput;
@@ -29,7 +29,7 @@ public class AddCustomerPage extends BasePage {
      *
      * @param driver экземпляр {@code WebDriver}
      */
-    public AddCustomerPage(final WebDriver driver) {
+    public AddCustomerPage(WebDriver driver) {
         super(driver);
     }
 
@@ -41,7 +41,6 @@ public class AddCustomerPage extends BasePage {
      * @param postCode  почтовый индекс клиента
      * @return текущий объект {@code AddCustomerPage}
      */
-
     @Step("Filling in customer details: First Name = {firstName}, Last Name = {lastName}, Post Code = {postCode}")
     public AddCustomerPage fillCustomerDataFields(String firstName, String lastName, String postCode) {
         postCodeInput.sendKeys(postCode);

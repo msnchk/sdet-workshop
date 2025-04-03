@@ -14,12 +14,18 @@ import java.util.stream.Collectors;
 /**
  * Класс {@code CustomersPage} представляет страницу со списком клиентов.
  */
-public class CustomersPage extends BasePage {
+public class CustomersPage extends BasePage<CustomersPage>{
     @FindBy(xpath = "//tr[@class='ng-scope']/td[1]")
     List<WebElement> firstNameColumn;
 
     @FindBy(xpath = "//a[contains(@ng-click, \"sortType = 'fName'\")]")
     WebElement firstNameSort;
+
+    @FindBy(css = "tr.ng-scope")
+    List<WebElement> tableRows;
+
+    By deleteButtonLocator = By.cssSelector("button[ng-click^='deleteCust']");
+    By cellLocator = By.cssSelector("td.ng-binding");
 
     /**
      * Конструктор страницы клиентов.
@@ -40,13 +46,20 @@ public class CustomersPage extends BasePage {
      */
     @Step("Checking if customer exists: First Name = {firstName}, Last Name = {lastName}, Post Code = {postCode}")
     public boolean isCustomerPresent(String firstName, String lastName, String postCode) {
-        String xpath = String.format("//tr[td[text()='%s'] and td[text()='%s'] and td[text()='%s']]",
-                firstName, lastName, postCode);
-        try {
-            return driver.findElement(By.xpath(xpath)).isDisplayed();
-        } catch (NoSuchElementException e) {
-            return false;
+        for (WebElement row : tableRows) {
+            List<WebElement> cells = row.findElements(cellLocator);
+
+            if (cells.size() >= 3) {
+                String foundFirstName = cells.get(0).getText().trim();
+                String foundLastName = cells.get(1).getText().trim();
+                String foundPostCode = cells.get(2).getText().trim();
+
+                if (foundFirstName.equals(firstName) && foundLastName.equals(lastName) && foundPostCode.equals(postCode)) {
+                    return true;
+                }
+            }
         }
+        return false;
     }
 
     /**
@@ -60,16 +73,15 @@ public class CustomersPage extends BasePage {
         if (name.isEmpty()) {
             return false;
         }
-        String xpath = "//tr[td[text()='" + name + "']]//button[contains(@ng-click, 'deleteCust')]";
-
-        try {
-            WebElement deleteButton = driver.findElement(By.xpath(xpath));
-            deleteButton.click();
-            return true;
-        } catch (NoSuchElementException e) {
-            System.out.println("Кнопка удаления не найдена для имени: " + name);
-            return false;
+        for (WebElement row : tableRows) {
+            List<WebElement> cells = row.findElements(cellLocator);
+            if (!cells.isEmpty() && cells.get(0).getText().equals(name)) {
+                WebElement deleteButton = row.findElement(deleteButtonLocator);
+                deleteButton.click();
+                return true;
+            }
         }
+        return false;
     }
 
     /**
@@ -81,13 +93,10 @@ public class CustomersPage extends BasePage {
     @Step("Checking if customer names are sorted. Reverse order: {reversed}")
     public boolean checkFirstNamesOrder(boolean reversed) {
         wait.waitForAllElementsToBeVisible(firstNameColumn);
-
         List<String> names = getAllFirstNames();
-
         List<String> sortedNames = names.stream()
                 .sorted(reversed ? String.CASE_INSENSITIVE_ORDER.reversed() : String.CASE_INSENSITIVE_ORDER)
                 .toList();
-
         return names.equals(sortedNames);
     }
 
@@ -103,14 +112,11 @@ public class CustomersPage extends BasePage {
         if (names.isEmpty()) {
             return "";
         }
-
         double average = names.stream()
                 .mapToInt(String::length)
                 .average()
                 .orElse(0);
-
         int roundedAverage = (int) Math.round(average);
-
         return names.stream()
                 .min(Comparator.comparingInt(name -> Math.abs(name.length() - roundedAverage)))
                 .orElse("");

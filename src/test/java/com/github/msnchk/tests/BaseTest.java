@@ -16,7 +16,8 @@ import java.net.URL;
  */
 public class BaseTest {
     private final static ThreadLocal<WebDriver> tlDriver = new ThreadLocal<>();
-    private final String urlManagerPage = PropertyProvider.getInstance().getProperty("web.manager.url");
+    private final String localhost = PropertyProvider.getInstance().getProperty("web.selenium.url");
+    protected final String managerUrl = PropertyProvider.getInstance().getProperty("web.manager.url");
 
     /**
      * Выполняет настройку перед каждым тестом.
@@ -35,10 +36,10 @@ public class BaseTest {
                     "--window-size=1920,1080",
                     "--disable-blink-features=AutomationControlled"
             );
-            WebDriver driver = new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), options);
+            WebDriver driver = new RemoteWebDriver(new URL(localhost), options);
             tlDriver.set(driver);
             driver.manage().deleteAllCookies();
-            driver.get(urlManagerPage);
+            driver.get(managerUrl);
 
         } catch (MalformedURLException e) {
             throw new RuntimeException("Ошибка при создании WebDriver: неверный URL Selenium Grid", e);
@@ -46,7 +47,8 @@ public class BaseTest {
     }
 
     /**
-     * Закрывает браузер после выполнения теста
+     * Завершает работу WebDriver после каждого теста.
+     * Закрывает браузер и освобождает ресурсы.
      */
     @AfterMethod
     public void tearDown() {
@@ -56,6 +58,10 @@ public class BaseTest {
         }
     }
 
+    /**
+     * Очищает WebDriver после выполнения всех тестов класса.
+     * Завершает работу WebDriver и удаляет его из ThreadLocal.
+     */
     @AfterClass
     public void cleanUp() {
         WebDriver driver = tlDriver.get();

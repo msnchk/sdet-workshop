@@ -8,7 +8,7 @@ import org.openqa.selenium.support.FindBy;
  * Класс {@code ManagerPage} представляет страницу менеджера с меню,
  * содержащим переходы к управлению клиентами.
  */
-public class ManagerPage extends BasePage {
+public class ManagerPage extends BasePage<ManagerPage> {
     @FindBy(xpath = "//button[contains(text(), 'Add Customer')]")
     private WebElement addCustomerButton;
 

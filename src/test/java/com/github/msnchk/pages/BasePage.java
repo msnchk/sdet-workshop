@@ -9,7 +9,7 @@ import org.openqa.selenium.support.PageFactory;
 /**
  * Базовый класс для всех страниц, содержит общие методы взаимодействия с элементами.
  */
-public class BasePage {
+public abstract class BasePage<T extends BasePage<T>>  {
     protected final WebDriver driver;
     protected final Wait wait;
 
@@ -28,13 +28,15 @@ public class BasePage {
     }
 
     /**
-     * Ожидает загрузку страницы по URL и появление заголовка страницы.
+     * Ожидает загрузку страницы, проверяя соответствие ожидаемого URL и видимость заголовка.
      *
      * @param url ожидаемый URL страницы
+     * @return текущий объект страницы после завершения ожидания
      */
-
-    public void waitForPageLoaded(String url) {
+    @SuppressWarnings("unchecked")
+    public T waitForPageLoaded(String url) {
         wait.waitForGetURL(url);
         wait.waitForElementToBeVisible(mainHeader);
+        return (T) this;
     }
 }

@@ -12,13 +12,11 @@ import org.testng.asserts.SoftAssert;
 /**
  * Класс {@code BankManagerUITest} содержит тесты для функционала управления клиентами
  */
-
 @Epic("Bank Customer Management")
 @Feature("UI Testing of Bank Manager Functionalities")
 public class BankManagerUITest extends BaseTest {
-    private final String urlManagerPage = PropertyProvider.getInstance().getProperty("web.manager.url");
-    private final String urlAddCustomer = PropertyProvider.getInstance().getProperty("web.addcust.url");
-    private final String urlCustomersList = PropertyProvider.getInstance().getProperty("web.customers.url");
+    private final String addCustUrl = PropertyProvider.getInstance().getProperty("web.addcust.url");
+    private final String customersUrl = PropertyProvider.getInstance().getProperty("web.customers.url");
 
     /**
      * Проверяет добавление клиента с корректными данными.
@@ -31,26 +29,27 @@ public class BankManagerUITest extends BaseTest {
     public void shouldAddCustomerWithValidData() {
         SoftAssert softAssert = new SoftAssert();
         ManagerPage managerPage = new ManagerPage(getDriver());
-        managerPage.waitForPageLoaded(urlManagerPage);
-        var addCustomerPage = managerPage.goToAddCustomer();
-        addCustomerPage.waitForPageLoaded(urlAddCustomer);
-        Customer customer = addCustomerPage.createCustomerWithGeneratedData();
+        var addCustomerPage = managerPage
+                .waitForPageLoaded(managerUrl)
+                .goToAddCustomer();
+        Customer customer = addCustomerPage
+                .waitForPageLoaded(addCustUrl)
+                .createCustomerWithGeneratedData();
         addCustomerPage
                 .fillCustomerDataFields(customer.firstName(), customer.lastName(), customer.postCode())
                 .submitCustomerData();
 
         softAssert.assertTrue(addCustomerPage.isAlertWithTextPresent("Customer added successfully"),
                 "Не получен ожидаемый алерт о создании пользователя");
-
-        var customersPage = managerPage.goToCustomersList();
-        customersPage.waitForPageLoaded(urlCustomersList);
+        var customersPage = managerPage
+                .goToCustomersList()
+                .waitForPageLoaded(customersUrl);
 
         softAssert.assertTrue(customersPage.isCustomerPresent(
                         customer.firstName(), customer.lastName(), customer.postCode()),
                 "Клиент не найден в списке");
         softAssert.assertAll();
     }
-
 
     /**
      * Проверяет, что клиент не добавляется, если одно из полей пустое.
@@ -62,18 +61,19 @@ public class BankManagerUITest extends BaseTest {
     public void shouldNotAddCustomerWithEmptyFields(Customer customer) {
         SoftAssert softAssert = new SoftAssert();
         ManagerPage managerPage = new ManagerPage(getDriver());
-        managerPage.waitForPageLoaded(urlManagerPage);
-        var addCustomerPage = managerPage.goToAddCustomer();
-        addCustomerPage.waitForPageLoaded(urlAddCustomer);
+        var addCustomerPage = managerPage
+                .waitForPageLoaded(managerUrl)
+                .goToAddCustomer();
         addCustomerPage
+                .waitForPageLoaded(addCustUrl)
                 .fillCustomerDataFields(customer.firstName(), customer.lastName(), customer.postCode())
                 .submitCustomerData();
 
         softAssert.assertFalse(addCustomerPage.isAlertWithTextPresent("Customer added successfully"),
                "Получен алерт, появление которого не ожидалось");
-
-        var customersPage = managerPage.goToCustomersList();
-        customersPage.waitForPageLoaded(urlCustomersList);
+        var customersPage = managerPage
+                .goToCustomersList()
+                .waitForPageLoaded(customersUrl);
 
         softAssert.assertFalse(customersPage.isCustomerPresent(
                         customer.firstName(), customer.lastName(), customer.postCode()),
@@ -92,16 +92,19 @@ public class BankManagerUITest extends BaseTest {
     public void shouldSortCustomersByName() {
         SoftAssert softAssert = new SoftAssert();
         ManagerPage managerPage = new ManagerPage(getDriver());
-        managerPage.waitForPageLoaded(urlManagerPage);
-        var customersPage = managerPage.goToCustomersList();
-        customersPage.waitForPageLoaded(urlCustomersList);
+        var customersPage = managerPage
+                .waitForPageLoaded(managerUrl)
+                .goToCustomersList();
+        customersPage
+                .waitForPageLoaded(customersUrl)
+                .sortFirstNames();
+
+        softAssert.assertTrue(customersPage.checkFirstNamesOrder(true),
+                "Ошибка: имена клиентов не отсортированы по убыванию.");
         customersPage.sortFirstNames();
 
-        softAssert.assertTrue(customersPage.checkFirstNamesOrder(true));
-
-        customersPage.sortFirstNames();
-
-        softAssert.assertTrue(customersPage.checkFirstNamesOrder(false));
+        softAssert.assertTrue(customersPage.checkFirstNamesOrder(false),
+                "Ошибка: имена клиентов не отсортированы по возрастанию.");
         softAssert.assertAll();
     }
 
@@ -115,18 +118,19 @@ public class BankManagerUITest extends BaseTest {
     @Severity(SeverityLevel.CRITICAL)
     public void shouldDeleteCustomerByName() {
         ManagerPage managerPage = new ManagerPage(getDriver());
-        managerPage.waitForPageLoaded(urlManagerPage);
-        var customersPage = managerPage.goToCustomersList();
-        customersPage.waitForPageLoaded(urlCustomersList);
-        String nameToDelete = customersPage.getMiddleLengthName();
+        var customersPage = managerPage
+                .waitForPageLoaded(managerUrl)
+                .goToCustomersList();
+        String nameToDelete = customersPage
+                .waitForPageLoaded(customersUrl)
+                .getMiddleLengthName();
 
         Assert.assertFalse(nameToDelete.isEmpty(), "Не удалось определить имя для удаления");
         System.out.println("Удаляем клиента с именем: " + nameToDelete);
+
         Assert.assertTrue(customersPage.deleteName(nameToDelete),
                 "Не удалось кликнуть по кнопке удаления клиента с именем " + nameToDelete);
-
-        getDriver().navigate().refresh();
-        customersPage.waitForPageLoaded(urlCustomersList);
+        customersPage.waitForPageLoaded(customersUrl);
 
         Assert.assertFalse(customersPage.getAllFirstNames().contains(nameToDelete),
                 "Клиент с именем " + nameToDelete + " все еще присутствует в списке после удаления");

@@ -36,7 +36,7 @@ public class BankManagerUITest extends BaseTest {
                 .waitForPageLoaded(addCustUrl)
                 .createCustomerWithGeneratedData();
         addCustomerPage
-                .fillCustomerDataFields(customer.firstName(), customer.lastName(), customer.postCode())
+                .fillCustomerDataFields(customer.getFirstName(), customer.getLastName(), customer.getPostCode())
                 .submitCustomerData();
 
         softAssert.assertTrue(addCustomerPage.isAlertWithTextPresent("Customer added successfully"),
@@ -46,7 +46,7 @@ public class BankManagerUITest extends BaseTest {
                 .waitForPageLoaded(customersUrl);
 
         softAssert.assertTrue(customersPage.isCustomerPresent(
-                        customer.firstName(), customer.lastName(), customer.postCode()),
+                        customer.getFirstName(), customer.getLastName(), customer.getPostCode()),
                 "Клиент не найден в списке");
         softAssert.assertAll();
     }
@@ -66,7 +66,7 @@ public class BankManagerUITest extends BaseTest {
                 .goToAddCustomer();
         addCustomerPage
                 .waitForPageLoaded(addCustUrl)
-                .fillCustomerDataFields(customer.firstName(), customer.lastName(), customer.postCode())
+                .fillCustomerDataFields(customer.getFirstName(), customer.getLastName(), customer.getPostCode())
                 .submitCustomerData();
 
         softAssert.assertFalse(addCustomerPage.isAlertWithTextPresent("Customer added successfully"),
@@ -76,7 +76,7 @@ public class BankManagerUITest extends BaseTest {
                 .waitForPageLoaded(customersUrl);
 
         softAssert.assertFalse(customersPage.isCustomerPresent(
-                        customer.firstName(), customer.lastName(), customer.postCode()),
+                        customer.getFirstName(), customer.getLastName(), customer.getPostCode()),
                 "Клиент c некорректными данными найден в списке");
         softAssert.assertAll();
     }
@@ -126,12 +126,9 @@ public class BankManagerUITest extends BaseTest {
                 .getMiddleLengthName();
 
         Assert.assertFalse(nameToDelete.isEmpty(), "Не удалось определить имя для удаления");
-        System.out.println("Удаляем клиента с именем: " + nameToDelete);
-
         Assert.assertTrue(customersPage.deleteName(nameToDelete),
                 "Не удалось кликнуть по кнопке удаления клиента с именем " + nameToDelete);
         customersPage.waitForPageLoaded(customersUrl);
-
         Assert.assertFalse(customersPage.getAllFirstNames().contains(nameToDelete),
                 "Клиент с именем " + nameToDelete + " все еще присутствует в списке после удаления");
     }

@@ -4,8 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * Класс {@code Customer} представляет собой модель клиента с полями:
+ * Класс {@code Customer} представляет модель клиента с полями:
  * имя, фамилия и почтовый индекс.
+ * Генерация геттеров и конструктора осуществляется с помощью Lombok.
  */
 @Getter
 @AllArgsConstructor
